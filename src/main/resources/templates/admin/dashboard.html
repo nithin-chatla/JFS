@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/fragments :: head('Warden Administration Dashboard')}"></head>
+<body>
+
+<div th:replace="~{common/fragments :: navbar}"></div>
+<div th:replace="~{common/fragments :: alerts}"></div>
+
+<div class="main-wrapper">
+    <!-- Header Banner -->
+    <div class="card-custom" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #312e81 100%); color: white; margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem;">
+            <div>
+                <span class="hero-tag" style="background: rgba(255,255,255,0.12); color: #e0e7ff; margin-bottom: 0.6rem;">
+                    <i class="bi bi-shield-check"></i> Warden Control Hub
+                </span>
+                <h1 style="color: white; font-size: 2rem; margin-top: 0.25rem;">
+                    Hostel Maintenance Overview
+                </h1>
+                <p style="color: #94a3b8; font-size: 0.9rem; margin-top: 0.25rem;">
+                    Monitor operational resolution rate, technician workloads, and active room complaints
+                </p>
+            </div>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <a th:href="@{/admin/export-csv}" class="btn-custom btn-secondary btn-sm" style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.25);">
+                    <i class="bi bi-download"></i> Export CSV Data
+                </a>
+                <a th:href="@{/admin/notices}" class="btn-custom btn-primary btn-sm">
+                    <i class="bi bi-megaphone-fill"></i> Broadcast Notice
+                </a>
+                <a th:href="@{/admin/staff}" class="btn-custom btn-secondary btn-sm">
+                    <i class="bi bi-person-plus-fill"></i> Manage Staff
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Productive KPI Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon primary"><i class="bi bi-journal-text"></i></div>
+            <div class="stat-info">
+                <h3 th:text="${stats.totalComplaints}">0</h3>
+                <p>Total Complaints</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon warning"><i class="bi bi-hourglass-split"></i></div>
+            <div class="stat-info">
+                <h3 th:text="${stats.pendingComplaints}">0</h3>
+                <p>Pending Review</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon info"><i class="bi bi-gear-wide-connected"></i></div>
+            <div class="stat-info">
+                <h3 th:text="${stats.inProgressComplaints}">0</h3>
+                <p>Active Work Orders</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon success"><i class="bi bi-check-circle-fill"></i></div>
+            <div class="stat-info">
+                <h3 th:text="${stats.resolvedComplaints}">0</h3>
+                <p>Resolved / Closed</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts & Analytics Section -->
+    <!-- Charts & Analytics Section -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+        <div class="card-custom">
+            <div class="card-header-flex">
+                <h3 style="font-size: 1.1rem;"><i class="bi bi-pie-chart-fill" style="color: var(--primary-light);"></i> Issues by Category</h3>
+            </div>
+            <div th:if="${stats.totalComplaints == 0}" style="height: 240px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--dark-muted); text-align: center;">
+                <i class="bi bi-pie-chart" style="font-size: 2.4rem; color: #cbd5e1; margin-bottom: 0.5rem;"></i>
+                <strong style="font-size: 0.9rem; color: var(--dark);">No Category Data Yet</strong>
+                <span style="font-size: 0.8rem; color: var(--dark-muted); max-width: 280px; margin-top: 0.2rem;">Category analytics will generate automatically as residents lodge work orders.</span>
+            </div>
+            <div th:if="${stats.totalComplaints > 0}" style="height: 260px; display: flex; justify-content: center; align-items: center;">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+        <div class="card-custom">
+            <div class="card-header-flex">
+                <h3 style="font-size: 1.1rem;"><i class="bi bi-bar-chart-fill" style="color: var(--secondary);"></i> Complaints by Hostel Block</h3>
+            </div>
+            <div th:if="${stats.totalComplaints == 0}" style="height: 240px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--dark-muted); text-align: center;">
+                <i class="bi bi-bar-chart" style="font-size: 2.4rem; color: #cbd5e1; margin-bottom: 0.5rem;"></i>
+                <strong style="font-size: 0.9rem; color: var(--dark);">No Block Volume Yet</strong>
+                <span style="font-size: 0.8rem; color: var(--dark-muted); max-width: 280px; margin-top: 0.2rem;">Block-wise breakdown will appear here once resident tickets are submitted.</span>
+            </div>
+            <div th:if="${stats.totalComplaints > 0}" style="height: 260px;">
+                <canvas id="blockChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Latest Complaints Table with Instant Search -->
+    <div class="card-custom">
+        <div class="card-header-flex">
+            <div>
+                <h3><i class="bi bi-clock-history" style="color: var(--primary);"></i> Recent Complaints Feed</h3>
+                <p style="color: var(--dark-muted); font-size: 0.825rem;">Live stream of resident maintenance requests</p>
+            </div>
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                <input type="text" id="tableSearchInput" class="form-control" placeholder="Quick filter..." style="width: 220px; padding: 0.45rem 0.85rem; font-size: 0.85rem;">
+                <a th:href="@{/admin/complaints}" class="btn-custom btn-secondary btn-sm">View All Complaints</a>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table-custom filterable-table">
+                <thead>
+                    <tr>
+                        <th>Ticket ID</th>
+                        <th>Student & Room</th>
+                        <th>Category</th>
+                        <th>Title</th>
+                        <th>Priority</th>
+                        <th>Assigned Staff</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(recentComplaints)}">
+                        <td colspan="8" style="text-align: center; padding: 3rem 1.5rem; color: var(--dark-muted);">
+                            <i class="bi bi-inbox" style="font-size: 2.5rem; display: block; margin-bottom: 0.6rem; color: #94a3b8;"></i>
+                            <strong style="font-size: 1rem; color: var(--dark);">No Maintenance Complaints Logged Yet</strong>
+                            <p style="font-size: 0.85rem; margin-top: 0.3rem;">When registered students submit maintenance tickets, they will appear here in real time.</p>
+                        </td>
+                    </tr>
+                    <tr th:each="c : ${recentComplaints}">
+                        <td><strong style="font-family: monospace; font-size: 0.85rem;" th:text="${c.complaintNumber}">HCMS-101</strong></td>
+                        <td>
+                            <div style="font-weight: 700;" th:text="${c.student.fullName}">Rahul Verma</div>
+                            <div style="font-size: 0.775rem; color: var(--dark-muted);" th:text="${c.hostelBlock + ', Room ' + c.roomNumber}">Block A, 204</div>
+                        </td>
+                        <td>
+                            <i th:class="'bi ' + ${c.category.iconClass}" style="color: var(--primary-light);"></i>
+                            <span th:text="${c.category.displayName}">Category</span>
+                        </td>
+                        <td th:text="${c.title}" style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500;">Fan slow</td>
+                        <td><span th:class="'badge-priority ' + ${c.priority.badgeClass}" th:text="${c.priority.displayName}">HIGH</span></td>
+                        <td>
+                            <span th:if="${c.assignedStaff != null}" style="font-weight: 600;" th:text="${c.assignedStaff.fullName}">Staff Name</span>
+                            <span th:if="${c.assignedStaff == null}" style="color: var(--danger); font-size: 0.8rem; font-weight: 700;">Unassigned</span>
+                        </td>
+                        <td><span th:class="'badge-status ' + ${c.status.statusClass}" th:text="${c.status.displayName}">Pending</span></td>
+                        <td>
+                            <a th:href="@{/admin/complaints/{id}(id=${c.id})}" class="btn-custom btn-primary btn-sm">
+                                <i class="bi bi-gear-fill"></i> Manage
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        // Category Chart
+        const catCounts = /*[[${stats.categoryCounts}]]*/ {};
+        const catLabels = Object.keys(catCounts);
+        const catData = Object.values(catCounts);
+
+        if (catLabels.length > 0) {
+            new Chart(document.getElementById('categoryChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: catLabels,
+                    datasets: [{
+                        data: catData,
+                        backgroundColor: ['#4f46e5', '#0ea5e9', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#64748b'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { font: { family: 'Plus Jakarta Sans', size: 12 } } }
+                    }
+                }
+            });
+        }
+
+        // Block Chart
+        const blockCounts = /*[[${stats.blockCounts}]]*/ {};
+        const blockLabels = Object.keys(blockCounts);
+        const blockData = Object.values(blockCounts);
+
+        if (blockLabels.length > 0) {
+            new Chart(document.getElementById('blockChart'), {
+                type: 'bar',
+                data: {
+                    labels: blockLabels,
+                    datasets: [{
+                        label: 'Complaints',
+                        data: blockData,
+                        backgroundColor: 'rgba(99, 102, 241, 0.85)',
+                        borderColor: '#4f46e5',
+                        borderWidth: 1,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+<div th:replace="~{common/fragments :: footer}"></div>
+</body>
+</html>

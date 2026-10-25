@@ -1,0 +1,2 @@
+id,full_name,email,role,phone,hostel_block,room_number,bed_number,department,specialization
+1,Nithin Chatla,nithin@gmail.com,ROLE_ADMIN,+91 98765 43210,N/A,N/A,N/A,Hostel Administration,N/A

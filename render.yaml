@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: hostel-complaint-system
+    env: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /login
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: SPRING_PROFILES_ACTIVE
+        value: h2

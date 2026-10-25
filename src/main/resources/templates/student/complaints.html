@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/fragments :: head('My Complaints')}"></head>
+<body>
+
+<div th:replace="~{common/fragments :: navbar}"></div>
+<div th:replace="~{common/fragments :: alerts}"></div>
+
+<div class="main-wrapper">
+    <div class="card-custom">
+        <div class="card-header-flex">
+            <div>
+                <h2>My Lodged Complaints</h2>
+                <p style="color: var(--dark-muted); font-size: 0.875rem;">Track progress, technician updates, and submit ratings</p>
+            </div>
+            <a th:href="@{/student/lodge}" class="btn-custom btn-primary btn-sm">
+                <i class="bi bi-plus-circle-fill"></i> New Complaint
+            </a>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap;">
+            <a th:href="@{/student/complaints}" 
+               th:class="${selectedStatus == 'ALL' ? 'btn-custom btn-primary btn-sm' : 'btn-custom btn-secondary btn-sm'}">All</a>
+            <a th:href="@{/student/complaints(status='PENDING')}" 
+               th:class="${selectedStatus == 'PENDING' ? 'btn-custom btn-primary btn-sm' : 'btn-custom btn-secondary btn-sm'}">Pending</a>
+            <a th:href="@{/student/complaints(status='IN_PROGRESS')}" 
+               th:class="${selectedStatus == 'IN_PROGRESS' ? 'btn-custom btn-primary btn-sm' : 'btn-custom btn-secondary btn-sm'}">In Progress</a>
+            <a th:href="@{/student/complaints(status='RESOLVED')}" 
+               th:class="${selectedStatus == 'RESOLVED' ? 'btn-custom btn-primary btn-sm' : 'btn-custom btn-secondary btn-sm'}">Resolved</a>
+        </div>
+
+        <div th:if="${#lists.isEmpty(complaints)}" style="text-align: center; padding: 3rem; color: var(--dark-muted);">
+            <i class="bi bi-search" style="font-size: 2.5rem;"></i>
+            <p style="margin-top: 0.5rem;">No complaints found for the selected status.</p>
+        </div>
+
+        <div class="table-responsive" th:if="${not #lists.isEmpty(complaints)}">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Ticket ID</th>
+                        <th>Category</th>
+                        <th>Title</th>
+                        <th>Priority</th>
+                        <th>Assigned Staff</th>
+                        <th>Status</th>
+                        <th>Date Lodged</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="c : ${complaints}">
+                        <td><strong style="font-family: monospace;" th:text="${c.complaintNumber}">HCMS-101</strong></td>
+                        <td>
+                            <i th:class="'bi ' + ${c.category.iconClass}"></i>
+                            <span th:text="${c.category.displayName}">Category</span>
+                        </td>
+                        <td>
+                            <div style="font-weight: 600;" th:text="${c.title}">Title</div>
+                            <div style="font-size: 0.775rem; color: var(--dark-muted);" th:text="${c.hostelBlock + ', ' + c.roomNumber}">Room</div>
+                        </td>
+                        <td><span th:class="'badge-priority ' + ${c.priority.badgeClass}" th:text="${c.priority.displayName}">HIGH</span></td>
+                        <td>
+                            <span th:if="${c.assignedStaff != null}" th:text="${c.assignedStaff.fullName + ' (' + c.assignedStaff.specialization + ')'}">Staff</span>
+                            <span th:if="${c.assignedStaff == null}" style="color: var(--dark-muted);">Unassigned</span>
+                        </td>
+                        <td><span th:class="'badge-status ' + ${c.status.statusClass}" th:text="${c.status.displayName}">Pending</span></td>
+                        <td th:text="${#temporals.format(c.createdAt, 'dd MMM yyyy')}">04 Oct 2026</td>
+                        <td>
+                            <a th:href="@{/student/complaints/{id}(id=${c.id})}" class="btn-custom btn-secondary btn-sm">
+                                <i class="bi bi-arrow-right-circle"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{common/fragments :: footer}"></div>
+</body>
+</html>

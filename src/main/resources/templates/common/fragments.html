@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title + ' | CampusStay HMS - Institutional Residence Portal'}">CampusStay HMS - Institutional Residence Portal</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<!-- Global Navbar -->
+<nav th:fragment="navbar" class="navbar-main">
+    <div class="navbar-container">
+        <a th:href="@{/}" class="brand-logo">
+            <div class="brand-icon-wrap">
+                <i class="bi bi-building-check"></i>
+            </div>
+            <div class="brand-text-block">
+                <span class="brand-title">Campus<span>Stay</span></span>
+                <span class="brand-tagline">Residence & Facility Services</span>
+            </div>
+        </a>
+
+        <div class="nav-system-status d-none-mobile">
+            <span class="pulse-indicator"></span>
+            <span>Live Helpdesk &bull; Port 9090</span>
+        </div>
+
+        <ul class="nav-links">
+            <li><a th:href="@{/}" class="nav-link"><i class="bi bi-house-door"></i> Home</a></li>
+            <li><a th:href="@{/track}" class="nav-link"><i class="bi bi-search"></i> Track Ticket</a></li>
+
+            <!-- Student Navigation -->
+            <li sec:authorize="hasRole('ROLE_STUDENT')"><a th:href="@{/student/dashboard}" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+            <li sec:authorize="hasRole('ROLE_STUDENT')"><a th:href="@{/student/lodge}" class="nav-link nav-link-highlight"><i class="bi bi-plus-circle-fill"></i> Lodge Issue</a></li>
+            <li sec:authorize="hasRole('ROLE_STUDENT')"><a th:href="@{/student/complaints}" class="nav-link"><i class="bi bi-folder2-open"></i> My Complaints</a></li>
+            <li sec:authorize="hasRole('ROLE_STUDENT')"><a th:href="@{/student/profile}" class="nav-link"><i class="bi bi-person-circle"></i> Profile</a></li>
+
+            <!-- Admin Navigation -->
+            <li sec:authorize="hasRole('ROLE_ADMIN')"><a th:href="@{/admin/dashboard}" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+            <li sec:authorize="hasRole('ROLE_ADMIN')"><a th:href="@{/admin/complaints}" class="nav-link"><i class="bi bi-inbox-fill"></i> Complaints</a></li>
+            <li sec:authorize="hasRole('ROLE_ADMIN')"><a th:href="@{/admin/staff}" class="nav-link"><i class="bi bi-tools"></i> Technicians</a></li>
+            <li sec:authorize="hasRole('ROLE_ADMIN')"><a th:href="@{/admin/students}" class="nav-link"><i class="bi bi-people-fill"></i> Residents</a></li>
+            <li sec:authorize="hasRole('ROLE_ADMIN')"><a th:href="@{/admin/notices}" class="nav-link"><i class="bi bi-megaphone-fill"></i> Notices</a></li>
+            <li sec:authorize="hasRole('ROLE_ADMIN')"><a th:href="@{/admin/reports}" class="nav-link"><i class="bi bi-graph-up-arrow"></i> Reports</a></li>
+
+            <!-- Staff Navigation -->
+            <li sec:authorize="hasRole('ROLE_STAFF')"><a th:href="@{/staff/dashboard}" class="nav-link"><i class="bi bi-speedometer2"></i> Work Orders</a></li>
+            <li sec:authorize="hasRole('ROLE_STAFF')"><a th:href="@{/staff/tasks}" class="nav-link"><i class="bi bi-check2-square"></i> Task Queue</a></li>
+
+            <!-- Anonymous Users -->
+            <li sec:authorize="isAnonymous()">
+                <a th:href="@{/login}" class="btn-custom btn-secondary btn-sm"><i class="bi bi-box-arrow-in-right"></i> Sign In</a>
+            </li>
+            <li sec:authorize="isAnonymous()">
+                <a th:href="@{/register}" class="btn-custom btn-primary btn-sm"><i class="bi bi-person-plus-fill"></i> Register</a>
+            </li>
+
+            <!-- Authenticated User Profile & Logout -->
+            <li sec:authorize="isAuthenticated()" class="user-nav-item">
+                <div class="user-profile-badge" th:if="${currentUser != null}">
+                    <div class="avatar-circle" th:text="${#strings.substring(currentUser.fullName, 0, 1)}">U</div>
+                    <div class="user-info-text">
+                        <span class="user-name" th:text="${currentUser.fullName}">User Name</span>
+                        <span class="user-role" th:text="${#strings.replace(currentUser.role.name(), 'ROLE_', '')}">STUDENT</span>
+                    </div>
+                </div>
+                <form th:action="@{/logout}" method="post" class="logout-form">
+                    <button type="submit" class="btn-custom btn-secondary btn-sm btn-logout" title="Sign Out">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Global Alerts -->
+<div th:fragment="alerts" class="main-wrapper alert-container" th:if="${successMessage != null or errorMessage != null}">
+    <div th:if="${successMessage}" class="alert-custom alert-success">
+        <div class="alert-icon-wrap"><i class="bi bi-check-circle-fill"></i></div>
+        <div class="alert-content">
+            <strong>Success</strong>
+            <p th:text="${successMessage}">Operation completed successfully.</p>
+        </div>
+    </div>
+    <div th:if="${errorMessage}" class="alert-custom alert-error">
+        <div class="alert-icon-wrap"><i class="bi bi-exclamation-octagon-fill"></i></div>
+        <div class="alert-content">
+            <strong>Attention Required</strong>
+            <p th:text="${errorMessage}">An error occurred while processing your request.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Global Footer -->
+<footer th:fragment="footer" class="footer-main">
+    <div class="main-wrapper">
+        <div class="footer-top-grid">
+            <div class="footer-brand-col">
+                <div class="brand-logo" style="margin-bottom: 0.75rem;">
+                    <div class="brand-icon-wrap">
+                        <i class="bi bi-building-check"></i>
+                    </div>
+                    <div class="brand-text-block">
+                        <span class="brand-title">Campus<span>Stay</span></span>
+                        <span class="brand-tagline">Residence & Facility Services</span>
+                    </div>
+                </div>
+                <p class="footer-desc">
+                    Enterprise residential complaint tracking, maintenance workflow dispatch, and hostel operations management portal.
+                </p>
+                <div class="footer-status-tag">
+                    <span class="pulse-indicator"></span> 24/7 Facility Response Desk Active
+                </div>
+            </div>
+
+            <div class="footer-links-col">
+                <h4>Quick Portals</h4>
+                <ul>
+                    <li><a th:href="@{/track}"><i class="bi bi-chevron-right"></i> Track Complaint ID</a></li>
+                    <li><a th:href="@{/login}"><i class="bi bi-chevron-right"></i> Resident Sign In</a></li>
+                    <li><a th:href="@{/register}"><i class="bi bi-chevron-right"></i> Hostel Room Registration</a></li>
+                    <li><a th:href="@{/login}"><i class="bi bi-chevron-right"></i> Warden Administrative Desk</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-links-col">
+                <h4>Maintenance Cells</h4>
+                <ul>
+                    <li><span><i class="bi bi-lightning-charge"></i> Electrical Cell (Ext: 401)</span></li>
+                    <li><span><i class="bi bi-droplet"></i> Plumbing & Water (Ext: 402)</span></li>
+                    <li><span><i class="bi bi-tools"></i> Carpentry & Masonry (Ext: 403)</span></li>
+                    <li><span><i class="bi bi-wifi"></i> Wi-Fi & IT Support (Ext: 404)</span></li>
+                </ul>
+            </div>
+
+            <div class="footer-links-col">
+                <h4>Emergency Contacts</h4>
+                <div class="emergency-box">
+                    <div><strong>Chief Warden Office:</strong> +91 98765 43210</div>
+                    <div><strong>Hostel Security Gate:</strong> Ext: 100 / 108</div>
+                    <div><strong>Medical & Ambulance:</strong> Ext: 104</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom-bar">
+            <div>
+                &copy; 2026 CampusStay Facilities & Residential Life. All rights reserved.
+            </div>
+            <div class="footer-tech-stack">
+                <span>Enterprise Architecture</span> &bull; <span>Spring Boot 3.3.4</span> &bull; <span>Spring Security 6</span> &bull; <span>Hibernate JPA</span>
+            </div>
+        </div>
+    </div>
+    <script th:src="@{/js/main.js}"></script>
+</footer>
+
+</body>
+</html>

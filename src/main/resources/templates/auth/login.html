@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/fragments :: head('Sign In | CampusStay HMS')}"></head>
+<body class="auth-body-bg">
+
+<div th:replace="~{common/fragments :: navbar}"></div>
+<div th:replace="~{common/fragments :: alerts}"></div>
+
+<div class="main-wrapper auth-page-wrapper">
+    <div class="auth-split-grid">
+        <!-- Left Column: Institutional Brand & SLA Overview -->
+        <div class="auth-side-panel">
+            <div class="side-panel-header">
+                <span class="badge-campus-tag">
+                    <i class="bi bi-shield-check"></i> Verified Institutional Portal
+                </span>
+                <h2>Residential Life &amp; Facilities Desk</h2>
+                <p>
+                    Centralized platform for hostel residents, maintenance engineers, and campus administration to lodge, manage, and inspect room service work orders.
+                </p>
+            </div>
+
+            <div class="service-commitments-list">
+                <div class="commitment-item">
+                    <div class="commitment-icon"><i class="bi bi-clock-history"></i></div>
+                    <div>
+                        <strong>Real-time SLA Tracking</strong>
+                        <p>Immediate technician dispatch with categorized resolution timelines.</p>
+                    </div>
+                </div>
+                <div class="commitment-item">
+                    <div class="commitment-icon"><i class="bi bi-person-badge-fill"></i></div>
+                    <div>
+                        <strong>Verified Campus Technicians</strong>
+                        <p>Certified in-house staff across electrical, plumbing, carpentry, and Wi-Fi networking.</p>
+                    </div>
+                </div>
+                <div class="commitment-item">
+                    <div class="commitment-icon"><i class="bi bi-star-fill"></i></div>
+                    <div>
+                        <strong>Transparent Quality Reviews</strong>
+                        <p>Rate completed repairs and reopen tickets if issues persist.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="side-panel-footer">
+                <div class="helpdesk-contact-chip">
+                    <i class="bi bi-telephone-inbound-fill"></i>
+                    <div>
+                        <span>Hostel Maintenance Helpline</span>
+                        <strong>Ext: 401 &bull; warden@hostel.edu</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Clean Enterprise Sign In Card -->
+        <div class="auth-form-panel">
+            <div class="auth-form-card">
+                <div class="auth-card-head">
+                    <div class="auth-icon-badge">
+                        <i class="bi bi-person-lock"></i>
+                    </div>
+                    <h3>Account Authentication</h3>
+                    <p>Enter your registered institutional credentials to access your portal</p>
+                </div>
+
+                <form th:action="@{/login}" method="post" class="auth-form">
+                    <div class="form-group">
+                        <label class="form-label" for="username">
+                            <i class="bi bi-envelope-at"></i> Institutional Email Address
+                        </label>
+                        <div class="input-icon-wrap">
+                            <input type="email" id="username" name="username" class="form-control" placeholder="e.g. name@hostel.edu" required autofocus autocomplete="username">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                            <label class="form-label" for="password">
+                                <i class="bi bi-key-fill"></i> Account Password
+                            </label>
+                            <span style="font-size: 0.775rem; color: var(--dark-muted);">Encrypted Session</span>
+                        </div>
+                        <div class="input-icon-wrap" style="position: relative;">
+                            <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required autocomplete="current-password" style="padding-right: 2.75rem;">
+                            <button type="button" class="btn-toggle-password" id="togglePasswordBtn" aria-label="Toggle password visibility" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--dark-muted); cursor: pointer; font-size: 1.1rem; padding: 0.25rem;">
+                                <i class="bi bi-eye" id="togglePasswordIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-custom btn-primary btn-block btn-lg" style="margin-top: 0.75rem;">
+                        <i class="bi bi-box-arrow-in-right"></i> Sign In to Account
+                    </button>
+                </form>
+
+                <div class="institutional-badge-strip" style="margin-top: 1.5rem; background: var(--light-bg); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.85rem 1rem; display: flex; align-items: center; gap: 0.75rem;">
+                    <i class="bi bi-shield-lock-fill" style="color: var(--primary); font-size: 1.25rem;"></i>
+                    <div style="font-size: 0.8rem; color: var(--dark-muted); line-height: 1.35;">
+                        <strong style="color: var(--dark); display: block;">Authorized Access Only</strong>
+                        Students, wardens, and staff can log in using their verified credentials.
+                    </div>
+                </div>
+
+                <div class="auth-card-footer">
+                    <span>New hostel resident?</span>
+                    <a th:href="@{/register}">Register Room Account</a>
+                    &bull;
+                    <a th:href="@{/track}">Track Ticket ID</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{common/fragments :: footer}"></div>
+</body>
+</html>

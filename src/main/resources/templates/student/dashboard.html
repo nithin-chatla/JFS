@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/fragments :: head('Student Dashboard')}"></head>
+<body>
+
+<div th:replace="~{common/fragments :: navbar}"></div>
+<div th:replace="~{common/fragments :: alerts}"></div>
+
+<div class="main-wrapper">
+    <!-- Welcome Header -->
+    <div class="card-custom" style="background: linear-gradient(135deg, #1e1b4b, #312e81); color: white; margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <span style="background: rgba(255,255,255,0.15); padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Student Portal</span>
+                <h1 style="color: white; font-size: 1.75rem; margin-top: 0.4rem;">
+                    Welcome back, <span th:text="${student.fullName}">Rahul</span>! 👋
+                </h1>
+                <p style="color: #c7d2fe; font-size: 0.875rem; margin-top: 0.2rem;">
+                    <i class="bi bi-geo-alt-fill"></i> <span th:text="${student.hostelBlock + ', Room ' + student.roomNumber + (student.bedNumber != null ? ' (' + student.bedNumber + ')' : '')}">Block A, Room 204</span> &bull; 
+                    <span th:text="${student.department}">Computer Science</span>
+                </p>
+            </div>
+            <div>
+                <a th:href="@{/student/lodge}" class="btn-custom btn-primary" style="background: #4f46e5; border: 1px solid rgba(255,255,255,0.3);">
+                    <i class="bi bi-plus-circle-fill"></i> Lodge New Complaint
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon primary"><i class="bi bi-folder2-open"></i></div>
+            <div class="stat-info">
+                <h3 th:text="${totalComplaints}">0</h3>
+                <p>My Total Complaints</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon warning"><i class="bi bi-hourglass-split"></i></div>
+            <div class="stat-info">
+                <h3 th:text="${pendingComplaints}">0</h3>
+                <p>Pending Review</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon info"><i class="bi bi-tools"></i></div>
+            <div class="stat-info">
+                <h3 th:text="${inProgressComplaints}">0</h3>
+                <p>In Progress / Assigned</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon success"><i class="bi bi-patch-check-fill"></i></div>
+            <div class="stat-info">
+                <h3 th:text="${resolvedComplaints}">0</h3>
+                <p>Resolved</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2 Column Layout: Recent Complaints & Notices -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+        <!-- Recent Complaints Table -->
+        <div class="card-custom">
+            <div class="card-header-flex">
+                <h3><i class="bi bi-clock-history"></i> Recent Complaints</h3>
+                <a th:href="@{/student/complaints}" class="btn-custom btn-secondary btn-sm">View All</a>
+            </div>
+
+            <div th:if="${#lists.isEmpty(recentComplaints)}" style="text-align: center; padding: 2.5rem; color: var(--dark-muted);">
+                <i class="bi bi-inbox" style="font-size: 2.5rem;"></i>
+                <p style="margin-top: 0.5rem;">You haven't lodged any complaints yet.</p>
+                <a th:href="@{/student/lodge}" class="btn-custom btn-primary btn-sm" style="margin-top: 0.75rem;">Lodge First Complaint</a>
+            </div>
+
+            <div class="table-responsive" th:if="${not #lists.isEmpty(recentComplaints)}">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Ticket</th>
+                            <th>Category</th>
+                            <th>Title</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="c : ${recentComplaints}">
+                            <td>
+                                <strong style="font-family: monospace; font-size: 0.8rem;" th:text="${c.complaintNumber}">HCMS-101</strong>
+                            </td>
+                            <td>
+                                <i th:class="'bi ' + ${c.category.iconClass}"></i>
+                                <span th:text="${c.category.displayName}">Category</span>
+                            </td>
+                            <td th:text="${c.title}" style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Fan issue</td>
+                            <td>
+                                <span th:class="'badge-priority ' + ${c.priority.badgeClass}" th:text="${c.priority.displayName}">HIGH</span>
+                            </td>
+                            <td>
+                                <span th:class="'badge-status ' + ${c.status.statusClass}" th:text="${c.status.displayName}">Pending</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/student/complaints/{id}(id=${c.id})}" class="btn-custom btn-secondary btn-sm">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Active Announcements for Students -->
+        <div class="card-custom">
+            <div class="card-header-flex">
+                <h3><i class="bi bi-megaphone-fill" style="color: var(--primary);"></i> Notice Board</h3>
+            </div>
+            <div th:if="${#lists.isEmpty(notices)}" style="text-align: center; color: var(--dark-muted); padding: 1.5rem;">
+                <p>No new notices at this time.</p>
+            </div>
+            <div th:each="n : ${notices}" style="padding-bottom: 0.85rem; margin-bottom: 0.85rem; border-bottom: 1px solid var(--card-border);">
+                <div style="font-weight: 700; font-size: 0.925rem; color: #1e293b;" th:text="${n.title}">Notice Title</div>
+                <div style="font-size: 0.8rem; color: #475569; margin-top: 0.25rem;" th:text="${n.content}">Details</div>
+                <div style="font-size: 0.725rem; color: var(--dark-muted); margin-top: 0.35rem;">
+                    <i class="bi bi-calendar-event"></i> <span th:text="${#temporals.format(n.publishedAt, 'dd MMM yyyy')}">Date</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{common/fragments :: footer}"></div>
+</body>
+</html>

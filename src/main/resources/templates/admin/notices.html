@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/fragments :: head('Hostel Notices - Admin')}"></head>
+<body>
+
+<div th:replace="~{common/fragments :: navbar}"></div>
+<div th:replace="~{common/fragments :: alerts}"></div>
+
+<div class="main-wrapper">
+    <div style="display: grid; grid-template-columns: 2fr 1.2fr; gap: 1.5rem;">
+        <!-- Notices List -->
+        <div class="card-custom">
+            <div class="card-header-flex">
+                <div>
+                    <h2>Hostel Notices & Announcements</h2>
+                    <p style="color: var(--dark-muted); font-size: 0.875rem;">Manage broadcasts displayed to students on landing and student dashboards</p>
+                </div>
+            </div>
+
+            <div th:if="${#lists.isEmpty(notices)}" style="text-align: center; padding: 2.5rem; color: var(--dark-muted);">
+                <p>No notices currently available.</p>
+            </div>
+
+            <div th:each="n : ${notices}" style="padding: 1rem 0; border-bottom: 1px solid var(--card-border);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.35rem;">
+                    <div>
+                        <h4 style="font-size: 1.05rem;" th:text="${n.title}">Notice Title</h4>
+                        <span class="badge-status status-assigned" style="font-size: 0.725rem;" th:text="${n.category}">Maintenance</span>
+                        <span th:if="${n.active}" class="badge-status status-resolved" style="font-size: 0.725rem;">Active / Visible</span>
+                        <span th:if="${!n.active}" class="badge-status status-rejected" style="font-size: 0.725rem;">Inactive / Hidden</span>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <form th:action="@{/admin/notices/{id}/toggle(id=${n.id})}" method="post">
+                            <button type="submit" class="btn-custom btn-secondary btn-sm" th:title="${n.active ? 'Hide Notice' : 'Show Notice'}">
+                                <i th:class="${n.active ? 'bi bi-eye-slash' : 'bi bi-eye'}"></i>
+                            </button>
+                        </form>
+                        <form th:action="@{/admin/notices/{id}/delete(id=${n.id})}" method="post">
+                            <button type="submit" class="btn-custom btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this notice?');" title="Delete Notice">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <p style="font-size: 0.875rem; color: #475569; margin-bottom: 0.4rem;" th:text="${n.content}">Notice Content</p>
+                <div style="font-size: 0.75rem; color: var(--dark-muted);">
+                    <i class="bi bi-clock"></i> <span th:text="${#temporals.format(n.publishedAt, 'dd MMM yyyy, hh:mm a')}">Date</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Post New Notice Form -->
+        <div class="card-custom" style="padding: 1.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.75rem;">
+                <div style="width: 40px; height: 40px; background: var(--primary-light); color: var(--primary); border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                    <i class="bi bi-megaphone-fill"></i>
+                </div>
+                <h3>Broadcast Notice</h3>
+            </div>
+
+            <form th:action="@{/admin/notices/new}" th:object="${noticeForm}" method="post">
+                <div class="form-group">
+                    <label class="form-label" for="title">Notice Title *</label>
+                    <input type="text" id="title" th:field="*{title}" class="form-control" placeholder="e.g. Water Tank Maintenance Schedule" required>
+                    <div class="form-text-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="category">Notice Category</label>
+                    <select id="category" th:field="*{category}" class="form-control">
+                        <option value="Maintenance">Maintenance Alert</option>
+                        <option value="Urgent Notice">Urgent Notice</option>
+                        <option value="Mess & Dining">Mess & Dining</option>
+                        <option value="General Hostel">General Hostel Announcement</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="content">Announcement Content *</label>
+                    <textarea id="content" th:field="*{content}" rows="5" class="form-control" placeholder="Provide full details, timings, and instructions for residents..." required></textarea>
+                    <div class="form-text-error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
+                </div>
+
+                <button type="submit" class="btn-custom btn-primary" style="width: 100%;">
+                    <i class="bi bi-send-fill"></i> Publish Announcement
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{common/fragments :: footer}"></div>
+</body>
+</html>

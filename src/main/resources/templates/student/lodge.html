@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/fragments :: head('Lodge Complaint')}"></head>
+<body>
+
+<div th:replace="~{common/fragments :: navbar}"></div>
+<div th:replace="~{common/fragments :: alerts}"></div>
+
+<div class="main-wrapper" style="max-width: 860px;">
+    <div class="card-custom" style="padding: 2.25rem;">
+        <!-- Header -->
+        <div style="display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1.25rem; margin-bottom: 1.75rem;">
+            <div style="width: 52px; height: 52px; background: var(--primary-subtle); color: var(--primary); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.15);">
+                <i class="bi bi-pencil-square"></i>
+            </div>
+            <div>
+                <h2>Lodge a Maintenance Complaint</h2>
+                <p style="color: var(--dark-muted); font-size: 0.885rem;">Select issue category, urgency level, and details for quick technician dispatch</p>
+            </div>
+        </div>
+
+        <form th:action="@{/student/lodge}" th:object="${complaintForm}" method="post">
+            <!-- 1. Interactive Visual Category Picker -->
+            <div class="form-group">
+                <label class="form-label"><i class="bi bi-grid-fill" style="color: var(--primary-light);"></i> 1. Select Issue Category *</label>
+                <div class="category-grid-select">
+                    <div class="category-radio-card" th:each="cat : ${T(com.hostel.complaints.model.ComplaintCategory).values()}">
+                        <input type="radio" th:field="*{category}" th:value="${cat}" th:id="${'cat_' + cat.name()}" required>
+                        <label th:for="${'cat_' + cat.name()}" class="category-card-content">
+                            <i th:class="'bi ' + ${cat.iconClass}"></i>
+                            <span class="cat-title" th:text="${cat.displayName}">Category</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-text-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
+            </div>
+
+            <!-- 2. Visual Urgency / Priority Selector -->
+            <div class="form-group">
+                <label class="form-label"><i class="bi bi-exclamation-triangle-fill" style="color: var(--warning);"></i> 2. Urgency Level *</label>
+                <div class="priority-options-grid">
+                    <div class="priority-option-card">
+                        <input type="radio" th:field="*{priority}" th:value="${T(com.hostel.complaints.model.ComplaintPriority).LOW}" id="p_low">
+                        <label for="p_low" class="priority-badge-label low">
+                            <i class="bi bi-circle"></i> Low (Within 3 Days)
+                        </label>
+                    </div>
+                    <div class="priority-option-card">
+                        <input type="radio" th:field="*{priority}" th:value="${T(com.hostel.complaints.model.ComplaintPriority).MEDIUM}" id="p_med">
+                        <label for="p_med" class="priority-badge-label medium">
+                            <i class="bi bi-dash-circle"></i> Medium (24-48 Hours)
+                        </label>
+                    </div>
+                    <div class="priority-option-card">
+                        <input type="radio" th:field="*{priority}" th:value="${T(com.hostel.complaints.model.ComplaintPriority).HIGH}" id="p_high">
+                        <label for="p_high" class="priority-badge-label high">
+                            <i class="bi bi-exclamation-circle"></i> High (Within 24 Hours)
+                        </label>
+                    </div>
+                    <div class="priority-option-card">
+                        <input type="radio" th:field="*{priority}" th:value="${T(com.hostel.complaints.model.ComplaintPriority).URGENT}" id="p_urg">
+                        <label for="p_urg" class="priority-badge-label urgent">
+                            <i class="bi bi-lightning-fill"></i> Urgent (Immediate)
+                        </label>
+                    </div>
+                </div>
+                <div class="form-text-error" th:if="${#fields.hasErrors('priority')}" th:errors="*{priority}"></div>
+            </div>
+
+            <!-- 3. Title & Location -->
+            <div class="form-group" style="margin-top: 1.5rem;">
+                <label class="form-label" for="title"><i class="bi bi-chat-left-text-fill" style="color: var(--secondary);"></i> 3. Complaint Summary / Title *</label>
+                <input type="text" id="title" th:field="*{title}" class="form-control" placeholder="e.g. Bathroom basin tap continuous water leak" required>
+                <div class="form-text-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                <div class="form-group">
+                    <label class="form-label" for="hostelBlock"><i class="bi bi-building"></i> Hostel Block *</label>
+                    <input type="text" id="hostelBlock" th:field="*{hostelBlock}" class="form-control" required>
+                    <div class="form-text-error" th:if="${#fields.hasErrors('hostelBlock')}" th:errors="*{hostelBlock}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="roomNumber"><i class="bi bi-door-open"></i> Room Number *</label>
+                    <input type="text" id="roomNumber" th:field="*{roomNumber}" class="form-control" required>
+                    <div class="form-text-error" th:if="${#fields.hasErrors('roomNumber')}" th:errors="*{roomNumber}"></div>
+                </div>
+            </div>
+
+            <!-- 4. Description -->
+            <div class="form-group">
+                <label class="form-label" for="description"><i class="bi bi-card-text"></i> Detailed Description *</label>
+                <textarea id="description" th:field="*{description}" rows="4" class="form-control" placeholder="Describe the defect, location inside the room, and when the issue started..." required></textarea>
+                <div class="form-text-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+            </div>
+
+            <!-- Actions -->
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1.25rem;">
+                <a th:href="@{/student/dashboard}" class="btn-custom btn-secondary">Cancel</a>
+                <button type="submit" class="btn-custom btn-primary" style="padding: 0.75rem 1.75rem;">
+                    <i class="bi bi-send-fill"></i> Submit Complaint Ticket
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div th:replace="~{common/fragments :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{common/fragments :: head('Campus Residence & Facilities Management Portal')}"></head>
+<body>
+
+<div th:replace="~{common/fragments :: navbar}"></div>
+<div th:replace="~{common/fragments :: alerts}"></div>
+
+<div class="main-wrapper">
+    <!-- Hero Banner with Institutional Excellence -->
+    <div class="hero-section">
+        <div class="hero-content-grid">
+            <div class="hero-text-block">
+                <div class="hero-tag">
+                    <span class="pulse-indicator"></span>
+                    <span>Institutional Residence &amp; Facility Desk</span>
+                </div>
+                <h1 class="hero-title">Campus Residence Maintenance &amp; Complaint Portal</h1>
+                <p class="hero-subtitle">
+                    A streamlined digital service desk for hostel residents, chief wardens, and certified maintenance technicians. Lodge tickets, track work orders in real-time, and verify completed repairs.
+                </p>
+                <div class="hero-action-buttons">
+                    <a sec:authorize="isAnonymous()" th:href="@{/login}" class="btn-custom btn-hero-primary">
+                        <i class="bi bi-box-arrow-in-right"></i> Resident &amp; Staff Sign In
+                    </a>
+                    <a sec:authorize="isAnonymous()" th:href="@{/register}" class="btn-custom btn-hero-secondary">
+                        <i class="bi bi-person-plus-fill"></i> New Resident Account
+                    </a>
+                    <a sec:authorize="hasRole('ROLE_STUDENT')" th:href="@{/student/lodge}" class="btn-custom btn-hero-primary">
+                        <i class="bi bi-plus-circle-fill"></i> Lodge Maintenance Ticket
+                    </a>
+                    <a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/admin/dashboard}" class="btn-custom btn-hero-primary">
+                        <i class="bi bi-speedometer2"></i> Open Warden Control Hub
+                    </a>
+                    <a sec:authorize="hasRole('ROLE_STAFF')" th:href="@{/staff/dashboard}" class="btn-custom btn-hero-primary">
+                        <i class="bi bi-check2-square"></i> My Work Orders
+                    </a>
+                    <a th:href="@{/track}" class="btn-custom btn-hero-outline">
+                        <i class="bi bi-search"></i> Quick Ticket Lookup
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Ticket Lookup Card in Hero -->
+            <div class="hero-quick-lookup-card">
+                <div class="lookup-card-header">
+                    <i class="bi bi-ticket-detailed-fill"></i>
+                    <div>
+                        <h4>Instant Ticket Tracker</h4>
+                        <span>No login required for status lookup</span>
+                    </div>
+                </div>
+                <form th:action="@{/track}" method="get" class="lookup-form">
+                    <div class="lookup-input-wrap">
+                        <i class="bi bi-qr-code-scan"></i>
+                        <input type="text" name="complaintNumber" placeholder="e.g. HCMS-261025-101" required>
+                    </div>
+                    <button type="submit" class="btn-custom btn-primary btn-block">
+                        <i class="bi bi-search"></i> Check Resolution Status
+                    </button>
+                </form>
+                <div class="lookup-card-footer">
+                    <span><i class="bi bi-shield-check"></i> Encrypted Public Verification</span>
+                    <a th:href="@{/login}">Staff Portal &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Operational KPIs Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon primary"><i class="bi bi-collection-fill"></i></div>
+            <div class="stat-info">
+                <h3 th:text="${stats.totalComplaints}">0</h3>
+                <p>Total Complaints Logged</p>
+                <span class="stat-trend positive"><i class="bi bi-activity"></i> All Time</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon warning"><i class="bi bi-hourglass-top"></i></div>
+            <div class="stat-info">
+                <h3 th:text="${stats.pendingComplaints}">0</h3>
+                <p>Awaiting Assignment</p>
+                <span class="stat-trend neutral"><i class="bi bi-clock-history"></i> Under Review</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon info"><i class="bi bi-wrench-adjustable-circle-fill"></i></div>
+            <div class="stat-info">
+                <h3 th:text="${stats.inProgressComplaints}">0</h3>
+                <p>Active Work Orders</p>
+                <span class="stat-trend warning-trend"><i class="bi bi-arrow-repeat"></i> In Field Repair</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon success"><i class="bi bi-patch-check-fill"></i></div>
+            <div class="stat-info">
+                <h3 th:text="${stats.resolvedComplaints}">0</h3>
+                <p>Resolved &amp; Closed</p>
+                <span class="stat-trend positive"><i class="bi bi-star-fill"></i> Verified by Student</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works Workflow Section -->
+    <div class="workflow-strip-card card-custom" style="margin-bottom: 2rem;">
+        <div class="card-header-flex">
+            <div>
+                <h3><i class="bi bi-diagram-3-fill" style="color: var(--primary);"></i> Complaint Resolution Lifecycle</h3>
+                <p style="color: var(--dark-muted); font-size: 0.85rem; margin: 0;">Standard 4-stage transparent turnaround framework</p>
+            </div>
+            <span class="badge-status status-resolved">Average Turnaround: &lt; 24 Hrs</span>
+        </div>
+        <div class="workflow-steps-grid">
+            <div class="step-card">
+                <div class="step-badge">01</div>
+                <div class="step-icon"><i class="bi bi-pencil-square"></i></div>
+                <h4>Lodge Request</h4>
+                <p>Resident submits room ticket with category, priority, and description.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-badge">02</div>
+                <div class="step-icon"><i class="bi bi-person-gear"></i></div>
+                <h4>Warden Dispatch</h4>
+                <p>Warden reviews and assigns the certified maintenance specialist.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-badge">03</div>
+                <div class="step-icon"><i class="bi bi-tools"></i></div>
+                <h4>Field Inspection</h4>
+                <p>Technician visits resident room, completes repair, and logs remarks.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-badge">04</div>
+                <div class="step-icon"><i class="bi bi-star-half"></i></div>
+                <h4>Feedback &amp; Rating</h4>
+                <p>Student confirms resolution quality with 1–5 stars or reopens ticket.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2 Column Section: Notice Bulletin & Maintenance Cells -->
+    <div class="home-two-col-grid">
+        <!-- Notice Bulletin Board -->
+        <div class="card-custom">
+            <div class="card-header-flex">
+                <h3><i class="bi bi-megaphone-fill" style="color: var(--primary);"></i> Official Hostel Notices</h3>
+                <span class="badge-status status-assigned" th:text="${notices.size()} + ' Published'">3 Published</span>
+            </div>
+            <div th:if="${#lists.isEmpty(notices)}" style="text-align: center; padding: 2.5rem; color: var(--dark-muted);">
+                <i class="bi bi-bell-slash" style="font-size: 2.5rem;"></i>
+                <p style="margin-top: 0.5rem;">No active maintenance announcements posted currently.</p>
+            </div>
+            <div class="notice-list-container">
+                <div th:each="notice : ${notices}" class="notice-item-card">
+                    <div class="notice-header-row">
+                        <h4 th:text="${notice.title}">Notice Title</h4>
+                        <span class="badge-notice-category" th:text="${notice.category}">Maintenance</span>
+                    </div>
+                    <p class="notice-text-content" th:text="${notice.content}">Content description</p>
+                    <div class="notice-meta-footer">
+                        <span><i class="bi bi-person-fill"></i> <span th:text="${notice.publishedBy}">Chief Warden Office</span></span>
+                        <span><i class="bi bi-calendar3"></i> <span th:text="${#temporals.format(notice.publishedAt, 'dd MMM yyyy, hh:mm a')}">04 Oct 2026</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Maintenance Specializations & Helpdesk -->
+        <div class="card-custom">
+            <div class="card-header-flex">
+                <h3><i class="bi bi-wrench-adjustable" style="color: var(--secondary);"></i> Facility Cells &amp; SLAs</h3>
+                <span class="badge-status status-in-progress">24/7 Response Active</span>
+            </div>
+
+            <div class="categories-grid">
+                <div class="category-pill-card">
+                    <div class="category-icon-box" style="background: #fef3c7; color: #d97706;">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                    </div>
+                    <div class="category-info">
+                        <strong>Electrical Cell</strong>
+                        <span>Fans, MCB, Lighting, Sockets</span>
+                        <div class="sla-chip"><i class="bi bi-clock"></i> SLA: 4 Hours</div>
+                    </div>
+                </div>
+
+                <div class="category-pill-card">
+                    <div class="category-icon-box" style="background: #e0f2fe; color: #0284c7;">
+                        <i class="bi bi-droplet-fill"></i>
+                    </div>
+                    <div class="category-info">
+                        <strong>Plumbing Cell</strong>
+                        <span>Taps, Geysers, Drainage, Pipes</span>
+                        <div class="sla-chip"><i class="bi bi-clock"></i> SLA: 6 Hours</div>
+                    </div>
+                </div>
+
+                <div class="category-pill-card">
+                    <div class="category-icon-box" style="background: #fef9c3; color: #ca8a04;">
+                        <i class="bi bi-hammer"></i>
+                    </div>
+                    <div class="category-info">
+                        <strong>Carpentry &amp; Woodwork</strong>
+                        <span>Doors, Study Tables, Locks, Beds</span>
+                        <div class="sla-chip"><i class="bi bi-clock"></i> SLA: 24 Hours</div>
+                    </div>
+                </div>
+
+                <div class="category-pill-card">
+                    <div class="category-icon-box" style="background: #eef2ff; color: #4f46e5;">
+                        <i class="bi bi-router-fill"></i>
+                    </div>
+                    <div class="category-info">
+                        <strong>Campus Wi-Fi &amp; Network</strong>
+                        <span>Access Points, LAN, Speeds</span>
+                        <div class="sla-chip"><i class="bi bi-clock"></i> SLA: 12 Hours</div>
+                    </div>
+                </div>
+
+                <div class="category-pill-card">
+                    <div class="category-icon-box" style="background: #ecfdf5; color: #059669;">
+                        <i class="bi bi-stars"></i>
+                    </div>
+                    <div class="category-info">
+                        <strong>Housekeeping &amp; Hygiene</strong>
+                        <span>Room Cleaning, Waste Disposal</span>
+                        <div class="sla-chip"><i class="bi bi-clock"></i> SLA: 8 Hours</div>
+                    </div>
+                </div>
+
+                <div class="category-pill-card">
+                    <div class="category-icon-box" style="background: #fee2e2; color: #dc2626;">
+                        <i class="bi bi-shield-exclamation"></i>
+                    </div>
+                    <div class="category-info">
+                        <strong>Civil &amp; General Repairs</strong>
+                        <span>Windows, Seepage, Masonry</span>
+                        <div class="sla-chip"><i class="bi bi-clock"></i> SLA: 48 Hours</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="emergency-alert-card">
+                <div class="emergency-icon-wrap"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                <div>
+                    <strong>Emergency Maintenance Hazard?</strong>
+                    <p>For immediate fire, power short-circuit, or water flooding hazards, dial Warden Security Desk at <strong>Ext: 100</strong> immediately.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{common/fragments :: footer}"></div>
+</body>
+</html>

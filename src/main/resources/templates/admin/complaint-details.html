@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/fragments :: head('Manage Complaint - Admin')}"></head>
+<body>
+
+<div th:replace="~{common/fragments :: navbar}"></div>
+<div th:replace="~{common/fragments :: alerts}"></div>
+
+<div class="main-wrapper" style="max-width: 1000px;">
+    <div style="margin-bottom: 1rem;">
+        <a th:href="@{/admin/complaints}" class="btn-custom btn-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Back to All Complaints
+        </a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+        <!-- Left: Complaint Details & Timeline -->
+        <div>
+            <div class="card-custom" style="padding: 1.75rem; margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--card-border); padding-bottom: 1rem; margin-bottom: 1.25rem;">
+                    <div>
+                        <span class="badge-status status-assigned" style="font-family: monospace; font-size: 0.85rem;" th:text="${complaint.complaintNumber}">HCMS-101</span>
+                        <h2 style="font-size: 1.35rem; margin-top: 0.35rem;" th:text="${complaint.title}">Fan issue</h2>
+                        <div style="font-size: 0.825rem; color: var(--dark-muted); margin-top: 0.25rem;">
+                            <i class="bi bi-clock"></i> Lodged on <span th:text="${#temporals.format(complaint.createdAt, 'dd MMM yyyy, hh:mm a')}">Date</span>
+                        </div>
+                    </div>
+                    <span th:class="'badge-status ' + ${complaint.status.statusClass}" th:text="${complaint.status.displayName}">Status</span>
+                </div>
+
+                <div style="margin-bottom: 1.25rem;">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: var(--dark-muted); text-transform: uppercase;">Issue Description</div>
+                    <p style="background: var(--light-bg); padding: 1rem; border-radius: var(--border-radius-sm); font-size: 0.925rem; color: #334155; margin-top: 0.35rem;" th:text="${complaint.description}">Description</p>
+                </div>
+
+                <!-- Student Info Card -->
+                <div style="background: var(--light-bg); padding: 1rem; border-radius: var(--border-radius-sm); margin-bottom: 1.25rem;">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: var(--dark-muted); text-transform: uppercase; margin-bottom: 0.5rem;">Student & Room Info</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.875rem;">
+                        <div><strong>Student:</strong> <span th:text="${complaint.student.fullName}">Rahul</span></div>
+                        <div><strong>Phone:</strong> <span th:text="${complaint.student.phone}">+91 98765</span></div>
+                        <div><strong>Hostel Block:</strong> <span th:text="${complaint.hostelBlock}">Block A</span></div>
+                        <div><strong>Room Number:</strong> <span th:text="${complaint.roomNumber}">204</span></div>
+                    </div>
+                </div>
+
+                <!-- Staff Remarks & Student Feedback if any -->
+                <div th:if="${complaint.staffRemarks != null}" style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 1rem; border-radius: var(--border-radius-sm); margin-bottom: 1.25rem;">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #1e40af; text-transform: uppercase;">Technician Field Report</div>
+                    <p style="font-size: 0.9rem; color: #1e3a8a; margin-top: 0.25rem;" th:text="${complaint.staffRemarks}">Remarks</p>
+                </div>
+
+                <div th:if="${complaint.rating != null}" style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 1rem; border-radius: var(--border-radius-sm); margin-bottom: 1.25rem;">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #166534; text-transform: uppercase;">Student Rating & Feedback</div>
+                    <div style="color: #f59e0b; font-size: 1.1rem; margin-top: 0.25rem;">
+                        <span th:each="i : ${#numbers.sequence(1, complaint.rating)}">★</span>
+                        <span style="color: #166534; font-size: 0.85rem; font-weight: 600;" th:text="${'(' + complaint.rating + '/5 Stars)'}">5/5</span>
+                    </div>
+                    <p style="font-size: 0.875rem; color: #14532d; font-style: italic; margin-top: 0.25rem;" th:text="${complaint.feedback}">Feedback</p>
+                </div>
+
+                <!-- Timeline -->
+                <div>
+                    <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem;"><i class="bi bi-clock-history"></i> Audit Trail</h4>
+                    <div class="timeline">
+                        <div th:each="log : ${complaint.logs}" class="timeline-item">
+                            <div class="timeline-point"></div>
+                            <div class="timeline-title" th:text="${log.action}">ACTION</div>
+                            <div class="timeline-time">
+                                <span th:text="${log.performedBy}">By Admin</span> &bull; 
+                                <span th:text="${#temporals.format(log.timestamp, 'dd MMM yyyy, hh:mm a')}">Time</span>
+                            </div>
+                            <div class="timeline-body" th:text="${log.remarks}">Remarks</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Action Panel (Warden Controls) -->
+        <div>
+            <div class="card-custom" style="padding: 1.5rem; position: sticky; top: 90px;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem;">
+                    <i class="bi bi-sliders"></i> Warden Actions
+                </h3>
+
+                <form th:action="@{/admin/complaints/{id}/action(id=${complaint.id})}" th:object="${actionForm}" method="post">
+                    <div class="form-group">
+                        <label class="form-label" for="assignedStaffId">Assign Maintenance Staff</label>
+                        <select id="assignedStaffId" th:field="*{assignedStaffId}" class="form-control">
+                            <option value="">-- Select Staff Member --</option>
+                            <option th:each="staff : ${staffList}" 
+                                    th:value="${staff.id}" 
+                                    th:text="${staff.fullName + ' (' + staff.specialization + ')'}">Staff Name</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="status">Update Status</label>
+                        <select id="status" th:field="*{status}" class="form-control" required>
+                            <option th:each="st : ${statuses}" 
+                                    th:value="${st}" 
+                                    th:text="${st.displayName}">Status</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="remarks">Warden Remarks / Instructions</label>
+                        <textarea id="remarks" th:field="*{remarks}" rows="3" class="form-control" placeholder="Add instructions or notes for technician/student..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-custom btn-primary" style="width: 100%;">
+                        <i class="bi bi-check2-circle"></i> Save & Apply Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{common/fragments :: footer}"></div>
+</body>
+</html>

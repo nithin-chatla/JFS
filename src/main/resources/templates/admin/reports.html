@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/fragments :: head('Analytics & Reports - Admin')}"></head>
+<body>
+
+<div th:replace="~{common/fragments :: navbar}"></div>
+<div th:replace="~{common/fragments :: alerts}"></div>
+
+<div class="main-wrapper">
+    <div class="card-custom" style="margin-bottom: 1.5rem;">
+        <div class="card-header-flex">
+            <div>
+                <h2>Hostel Maintenance Analytics & Performance</h2>
+                <p style="color: var(--dark-muted); font-size: 0.875rem;">System-wide trends, resolution ratios, and downloadable operational reports</p>
+            </div>
+            <a th:href="@{/admin/export-csv}" class="btn-custom btn-primary">
+                <i class="bi bi-file-earmark-spreadsheet-fill"></i> Download Complete CSV Report
+            </a>
+        </div>
+
+        <!-- Metrics Overview Cards -->
+        <div class="stats-grid" style="margin-top: 1rem;">
+            <div class="stat-card">
+                <div class="stat-icon primary"><i class="bi bi-pie-chart-fill"></i></div>
+                <div class="stat-info">
+                    <h3 th:text="${stats.resolutionRate + '%'}">85%</h3>
+                    <p>Overall Resolution Rate</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon success"><i class="bi bi-check2-all"></i></div>
+                <div class="stat-info">
+                    <h3 th:text="${stats.resolvedComplaints}">0</h3>
+                    <p>Total Closed / Resolved</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon warning"><i class="bi bi-people-fill"></i></div>
+                <div class="stat-info">
+                    <h3 th:text="${stats.totalStudents}">0</h3>
+                    <p>Registered Students</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon info"><i class="bi bi-tools"></i></div>
+                <div class="stat-info">
+                    <h3 th:text="${stats.totalStaff}">0</h3>
+                    <p>Maintenance Technicians</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4 Analytics Charts -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+            <div style="background: var(--light-bg); padding: 1.25rem; border-radius: var(--border-radius-sm); border: 1px solid var(--card-border);">
+                <h4 style="font-size: 0.95rem; margin-bottom: 1rem;"><i class="bi bi-pie-chart"></i> Complaints by Category</h4>
+                <div style="height: 260px; display: flex; justify-content: center;">
+                    <canvas id="reportsCatChart"></canvas>
+                </div>
+            </div>
+
+            <div style="background: var(--light-bg); padding: 1.25rem; border-radius: var(--border-radius-sm); border: 1px solid var(--card-border);">
+                <h4 style="font-size: 0.95rem; margin-bottom: 1rem;"><i class="bi bi-bar-chart"></i> Complaints by Hostel Block</h4>
+                <div style="height: 260px;">
+                    <canvas id="reportsBlockChart"></canvas>
+                </div>
+            </div>
+
+            <div style="background: var(--light-bg); padding: 1.25rem; border-radius: var(--border-radius-sm); border: 1px solid var(--card-border);">
+                <h4 style="font-size: 0.95rem; margin-bottom: 1rem;"><i class="bi bi-exclamation-triangle"></i> Complaints by Priority</h4>
+                <div style="height: 260px; display: flex; justify-content: center;">
+                    <canvas id="reportsPriorityChart"></canvas>
+                </div>
+            </div>
+
+            <div style="background: var(--light-bg); padding: 1.25rem; border-radius: var(--border-radius-sm); border: 1px solid var(--card-border);">
+                <h4 style="font-size: 0.95rem; margin-bottom: 1rem;"><i class="bi bi-check-circle"></i> Status Distribution</h4>
+                <div style="height: 260px; display: flex; justify-content: center;">
+                    <canvas id="reportsStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        // Category Chart
+        const catCounts = /*[[${stats.categoryCounts}]]*/ {};
+        new Chart(document.getElementById('reportsCatChart'), {
+            type: 'pie',
+            data: {
+                labels: Object.keys(catCounts),
+                datasets: [{
+                    data: Object.values(catCounts),
+                    backgroundColor: ['#4f46e5', '#0ea5e9', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#64748b']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // Block Chart
+        const blockCounts = /*[[${stats.blockCounts}]]*/ {};
+        new Chart(document.getElementById('reportsBlockChart'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(blockCounts),
+                datasets: [{
+                    label: 'Count',
+                    data: Object.values(blockCounts),
+                    backgroundColor: '#0ea5e9',
+                    borderRadius: 4
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+        });
+
+        // Priority Chart
+        const priCounts = /*[[${stats.priorityCounts}]]*/ {};
+        new Chart(document.getElementById('reportsPriorityChart'), {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(priCounts),
+                datasets: [{
+                    data: Object.values(priCounts),
+                    backgroundColor: ['#94a3b8', '#38bdf8', '#fb923c', '#f87171']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // Status Chart
+        const stCounts = /*[[${stats.statusCounts}]]*/ {};
+        new Chart(document.getElementById('reportsStatusChart'), {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(stCounts),
+                datasets: [{
+                    data: Object.values(stCounts),
+                    backgroundColor: ['#fef3c7', '#e0e7ff', '#dbeafe', '#d1fae5', '#fee2e2', '#ffedd5']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    });
+</script>
+
+<div th:replace="~{common/fragments :: footer}"></div>
+</body>
+</html>

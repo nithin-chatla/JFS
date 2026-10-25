@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/fragments :: head('Staff Dashboard')}"></head>
+<body>
+
+<div th:replace="~{common/fragments :: navbar}"></div>
+<div th:replace="~{common/fragments :: alerts}"></div>
+
+<div class="main-wrapper">
+    <!-- Header -->
+    <div class="card-custom" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <span style="background: rgba(255,255,255,0.15); padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Maintenance Technician Desk</span>
+                <h1 style="color: white; font-size: 1.75rem; margin-top: 0.4rem;">
+                    Technician Portal: <span th:text="${staff.fullName}">Ramesh Sharma</span>
+                </h1>
+                <p style="color: #94a3b8; font-size: 0.875rem; margin-top: 0.2rem;">
+                    <i class="bi bi-tools"></i> Role: <span th:text="${staff.specialization}">Electrician</span> &bull; 
+                    <i class="bi bi-telephone"></i> <span th:text="${staff.phone}">+91 98111</span>
+                </p>
+            </div>
+            <div>
+                <a th:href="@{/staff/tasks}" class="btn-custom btn-primary">
+                    <i class="bi bi-list-check"></i> View All Work Orders
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff Workload Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon primary"><i class="bi bi-clipboard-data"></i></div>
+            <div class="stat-info">
+                <h3 th:text="${totalAssigned}">0</h3>
+                <p>Total Assigned Tasks</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon warning"><i class="bi bi-bell"></i></div>
+            <div class="stat-info">
+                <h3 th:text="${pendingTasks}">0</h3>
+                <p>New / Awaiting Inspection</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon info"><i class="bi bi-gear-wide"></i></div>
+            <div class="stat-info">
+                <h3 th:text="${inProgressTasks}">0</h3>
+                <p>In Progress / Reopened</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon success"><i class="bi bi-check-circle-fill"></i></div>
+            <div class="stat-info">
+                <h3 th:text="${resolvedTasks}">0</h3>
+                <p>Resolved by Me</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assigned Work Orders Table -->
+    <div class="card-custom">
+        <div class="card-header-flex">
+            <h3><i class="bi bi-wrench-adjustable"></i> Active Work Orders & Tasks</h3>
+            <a th:href="@{/staff/tasks}" class="btn-custom btn-secondary btn-sm">View Full List</a>
+        </div>
+
+        <div th:if="${#lists.isEmpty(recentTasks)}" style="text-align: center; padding: 2.5rem; color: var(--dark-muted);">
+            <i class="bi bi-check-all" style="font-size: 2.5rem;"></i>
+            <p style="margin-top: 0.5rem;">Great job! You currently have no pending tasks assigned.</p>
+        </div>
+
+        <div class="table-responsive" th:if="${not #lists.isEmpty(recentTasks)}">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Ticket ID</th>
+                        <th>Hostel & Room</th>
+                        <th>Student Name & Phone</th>
+                        <th>Title / Issue</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="t : ${recentTasks}">
+                        <td><strong style="font-family: monospace;" th:text="${t.complaintNumber}">HCMS-101</strong></td>
+                        <td>
+                            <div style="font-weight: 700; color: var(--primary);" th:text="${t.hostelBlock}">Block A</div>
+                            <div style="font-size: 0.85rem;" th:text="${'Room ' + t.roomNumber}">Room 204</div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 600;" th:text="${t.student.fullName}">Rahul</div>
+                            <div style="font-size: 0.775rem; color: var(--dark-muted);"><i class="bi bi-telephone"></i> <span th:text="${t.student.phone}">+91 98765</span></div>
+                        </td>
+                        <td th:text="${t.title}" style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Fan grinding noise</td>
+                        <td><span th:class="'badge-priority ' + ${t.priority.badgeClass}" th:text="${t.priority.displayName}">HIGH</span></td>
+                        <td><span th:class="'badge-status ' + ${t.status.statusClass}" th:text="${t.status.displayName}">Assigned</span></td>
+                        <td>
+                            <a th:href="@{/staff/tasks/{id}(id=${t.id})}" class="btn-custom btn-primary btn-sm">
+                                <i class="bi bi-pencil"></i> Update Status
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{common/fragments :: footer}"></div>
+</body>
+</html>

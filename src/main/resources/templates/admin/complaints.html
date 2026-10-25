@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/fragments :: head('All Complaints - Admin')}"></head>
+<body>
+
+<div th:replace="~{common/fragments :: navbar}"></div>
+<div th:replace="~{common/fragments :: alerts}"></div>
+
+<div class="main-wrapper">
+    <div class="card-custom">
+        <div class="card-header-flex">
+            <div>
+                <h2>Complaints Management Master</h2>
+                <p style="color: var(--dark-muted); font-size: 0.875rem;">Filter, search, assign technicians, and monitor resolution timelines</p>
+            </div>
+            <a th:href="@{/admin/export-csv}" class="btn-custom btn-secondary btn-sm">
+                <i class="bi bi-download"></i> Export CSV
+            </a>
+        </div>
+
+        <!-- Multi-Filter Bar -->
+        <form th:action="@{/admin/complaints}" method="get" style="background: var(--light-bg); padding: 1.25rem; border-radius: var(--border-radius-sm); margin-bottom: 1.5rem; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 0.75rem; align-items: end;">
+            <div>
+                <label class="form-label" style="font-size: 0.8rem;">Search</label>
+                <input type="text" name="search" th:value="${searchQuery}" class="form-control" placeholder="Search ticket, name, room...">
+            </div>
+            <div>
+                <label class="form-label" style="font-size: 0.8rem;">Status</label>
+                <select name="status" class="form-control">
+                    <option value="ALL">All Statuses</option>
+                    <option th:each="st : ${statuses}" th:value="${st.name()}" th:text="${st.displayName}" th:selected="${selectedStatus == st.name()}">Status</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label" style="font-size: 0.8rem;">Category</label>
+                <select name="category" class="form-control">
+                    <option value="ALL">All Categories</option>
+                    <option th:each="cat : ${categories}" th:value="${cat.name()}" th:text="${cat.displayName}" th:selected="${selectedCategory == cat.name()}">Category</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label" style="font-size: 0.8rem;">Priority</label>
+                <select name="priority" class="form-control">
+                    <option value="ALL">All Priorities</option>
+                    <option th:each="p : ${priorities}" th:value="${p.name()}" th:text="${p.displayName}" th:selected="${selectedPriority == p.name()}">Priority</option>
+                </select>
+            </div>
+            <div>
+                <button type="submit" class="btn-custom btn-primary" style="padding: 0.65rem 1rem;">
+                    <i class="bi bi-funnel"></i> Filter
+                </button>
+            </div>
+        </form>
+
+        <div th:if="${#lists.isEmpty(complaints)}" style="text-align: center; padding: 3rem; color: var(--dark-muted);">
+            <i class="bi bi-search" style="font-size: 2.5rem;"></i>
+            <p style="margin-top: 0.5rem;">No complaints match the filter criteria.</p>
+        </div>
+
+        <div class="table-responsive" th:if="${not #lists.isEmpty(complaints)}">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Ticket ID</th>
+                        <th>Student Details</th>
+                        <th>Category</th>
+                        <th>Title</th>
+                        <th>Priority</th>
+                        <th>Assigned Staff</th>
+                        <th>Status</th>
+                        <th>Lodged On</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="c : ${complaints}">
+                        <td><strong style="font-family: monospace;" th:text="${c.complaintNumber}">HCMS-101</strong></td>
+                        <td>
+                            <div style="font-weight: 600;" th:text="${c.student.fullName}">Rahul Verma</div>
+                            <div style="font-size: 0.775rem; color: var(--dark-muted);" th:text="${c.hostelBlock + ', ' + c.roomNumber}">Block A, 204</div>
+                        </td>
+                        <td>
+                            <i th:class="'bi ' + ${c.category.iconClass}"></i>
+                            <span th:text="${c.category.displayName}">Category</span>
+                        </td>
+                        <td>
+                            <div style="font-weight: 500;" th:text="${c.title}">Title</div>
+                        </td>
+                        <td><span th:class="'badge-priority ' + ${c.priority.badgeClass}" th:text="${c.priority.displayName}">HIGH</span></td>
+                        <td>
+                            <span th:if="${c.assignedStaff != null}" th:text="${c.assignedStaff.fullName + ' (' + c.assignedStaff.specialization + ')'}">Staff</span>
+                            <span th:if="${c.assignedStaff == null}" style="color: var(--danger); font-size: 0.8rem; font-weight: 600;">Unassigned</span>
+                        </td>
+                        <td><span th:class="'badge-status ' + ${c.status.statusClass}" th:text="${c.status.displayName}">Pending</span></td>
+                        <td th:text="${#temporals.format(c.createdAt, 'dd MMM yyyy')}">Date</td>
+                        <td>
+                            <a th:href="@{/admin/complaints/{id}(id=${c.id})}" class="btn-custom btn-primary btn-sm">
+                                <i class="bi bi-gear-fill"></i> Manage
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{common/fragments :: footer}"></div>
+</body>
+</html>

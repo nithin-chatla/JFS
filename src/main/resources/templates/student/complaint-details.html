@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/fragments :: head('Complaint Details')}"></head>
+<body>
+
+<div th:replace="~{common/fragments :: navbar}"></div>
+<div th:replace="~{common/fragments :: alerts}"></div>
+
+<div class="main-wrapper" style="max-width: 980px;">
+    <div style="margin-bottom: 1rem;">
+        <a th:href="@{/student/complaints}" class="btn-custom btn-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Back to My Complaints
+        </a>
+    </div>
+
+    <div class="card-custom" style="padding: 2.25rem; margin-bottom: 1.5rem;">
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border-color); padding-bottom: 1.25rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <span class="badge-status status-assigned" style="font-family: monospace; font-size: 0.85rem;" th:text="${complaint.complaintNumber}">HCMS-101</span>
+                <h2 style="margin-top: 0.4rem; font-size: 1.45rem;" th:text="${complaint.title}">Fan not working</h2>
+                <div style="display: flex; gap: 1.25rem; color: var(--dark-muted); font-size: 0.85rem; margin-top: 0.4rem; flex-wrap: wrap;">
+                    <span><i class="bi bi-tag-fill" style="color: var(--primary-light);"></i> <span th:text="${complaint.category.displayName}">Electrical</span></span>
+                    <span><i class="bi bi-geo-alt-fill" style="color: var(--secondary);"></i> <span th:text="${complaint.hostelBlock + ' - Room ' + complaint.roomNumber}">Block A - 204</span></span>
+                    <span><i class="bi bi-calendar-event"></i> <span th:text="${#temporals.format(complaint.createdAt, 'dd MMM yyyy, hh:mm a')}">Date</span></span>
+                </div>
+            </div>
+            <div>
+                <span th:class="'badge-status ' + ${complaint.status.statusClass}" style="font-size: 0.925rem; padding: 0.45rem 1.15rem;">
+                    <i th:class="'bi ' + ${complaint.status.iconClass}"></i>
+                    <span th:text="${complaint.status.displayName}">Status</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Visual Step Wizard Progression Tracker -->
+        <div style="background: var(--light-bg); border-radius: var(--radius-md); padding: 1.5rem 1rem; border: 1px solid var(--border-color); margin-bottom: 2rem;">
+            <div style="font-size: 0.8rem; font-weight: 700; color: var(--dark-muted); text-transform: uppercase; letter-spacing: 0.05em; text-align: center; margin-bottom: 0.5rem;">
+                Live Resolution Progress
+            </div>
+            <div class="stepper-wizard">
+                <div class="stepper-progress-line"
+                     th:style="'width: ' + (${complaint.status.name() == 'PENDING' ? '12%' : (complaint.status.name() == 'ASSIGNED' ? '40%' : (complaint.status.name() == 'IN_PROGRESS' or complaint.status.name() == 'REOPENED' ? '68%' : '90%'))})"></div>
+
+                <!-- Step 1: Lodged -->
+                <div class="step-item" th:classappend="${complaint.status.name() == 'PENDING' ? 'active' : 'completed'}">
+                    <div class="step-circle"><i class="bi bi-file-earmark-plus"></i></div>
+                    <div class="step-label">1. Lodged</div>
+                </div>
+
+                <!-- Step 2: Assigned -->
+                <div class="step-item" th:classappend="${complaint.status.name() == 'ASSIGNED' ? 'active' : (complaint.status.name() == 'IN_PROGRESS' or complaint.status.name() == 'RESOLVED' or complaint.status.name() == 'REOPENED' ? 'completed' : '')}">
+                    <div class="step-circle"><i class="bi bi-person-check"></i></div>
+                    <div class="step-label">2. Staff Assigned</div>
+                </div>
+
+                <!-- Step 3: In Progress -->
+                <div class="step-item" th:classappend="${complaint.status.name() == 'IN_PROGRESS' or complaint.status.name() == 'REOPENED' ? 'active' : (complaint.status.name() == 'RESOLVED' ? 'completed' : '')}">
+                    <div class="step-circle"><i class="bi bi-tools"></i></div>
+                    <div class="step-label">3. Under Inspection</div>
+                </div>
+
+                <!-- Step 4: Resolved -->
+                <div class="step-item" th:classappend="${complaint.status.name() == 'RESOLVED' ? 'completed' : ''}">
+                    <div class="step-circle"><i class="bi bi-check2-all"></i></div>
+                    <div class="step-label">4. Resolved</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Issue Details & Cards -->
+        <div style="margin-bottom: 1.75rem;">
+            <h4 style="font-size: 0.95rem; margin-bottom: 0.4rem; color: var(--dark-muted);">Description</h4>
+            <div style="background: var(--light-bg); padding: 1.25rem; border-radius: var(--radius-sm); font-size: 0.95rem; color: #1e293b; line-height: 1.6; border: 1px solid var(--border-color);" th:text="${complaint.description}">
+                Details
+            </div>
+        </div>
+
+        <!-- Assigned Technician & Remarks Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 1.75rem;">
+            <div style="background: var(--light-bg); padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <div style="font-size: 0.8rem; font-weight: 700; color: var(--dark-muted); text-transform: uppercase;">Assigned Staff Member</div>
+                <div style="font-weight: 700; font-size: 1rem; margin-top: 0.35rem;">
+                    <span th:if="${complaint.assignedStaff != null}">
+                        <i class="bi bi-person-check-fill" style="color: var(--primary-light);"></i>
+                        <span th:text="${complaint.assignedStaff.fullName + ' (' + complaint.assignedStaff.specialization + ')'}">Staff Name</span>
+                        <div style="font-size: 0.825rem; font-weight: 600; color: var(--dark-muted); margin-top: 0.35rem;">
+                            <i class="bi bi-telephone-fill" style="color: var(--success);"></i> <a th:href="${'tel:' + complaint.assignedStaff.phone}" th:text="${complaint.assignedStaff.phone}">+91 98111</a>
+                        </div>
+                    </span>
+                    <span th:if="${complaint.assignedStaff == null}" style="color: var(--dark-muted); font-weight: normal;">
+                        Awaiting staff assignment from warden
+                    </span>
+                </div>
+            </div>
+
+            <div style="background: var(--light-bg); padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <div style="font-size: 0.8rem; font-weight: 700; color: var(--dark-muted); text-transform: uppercase;">Technician / Warden Remarks</div>
+                <div style="font-size: 0.9rem; margin-top: 0.35rem; color: #334155;">
+                    <div th:if="${complaint.staffRemarks != null}">
+                        <strong>Technician:</strong> <span th:text="${complaint.staffRemarks}">Remarks</span>
+                    </div>
+                    <div th:if="${complaint.wardenRemarks != null}" style="margin-top: 0.35rem;">
+                        <strong>Warden:</strong> <span th:text="${complaint.wardenRemarks}">Remarks</span>
+                    </div>
+                    <div th:if="${complaint.staffRemarks == null and complaint.wardenRemarks == null}" style="color: var(--dark-muted);">
+                        No remarks recorded yet.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Section (When Resolved) -->
+        <div th:if="${complaint.status.name() == 'RESOLVED'}" style="background: var(--success-subtle); border: 1px solid var(--success-border); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 2rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; color: #166534;">
+                <i class="bi bi-star-fill" style="color: #f59e0b; font-size: 1.25rem;"></i>
+                <h3 style="color: #166534; font-size: 1.15rem;">Student Resolution Rating & Feedback</h3>
+            </div>
+
+            <div th:if="${complaint.rating != null}">
+                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.35rem; color: #f59e0b; margin-bottom: 0.5rem;">
+                    <span th:each="i : ${#numbers.sequence(1, complaint.rating)}"><i class="bi bi-star-fill"></i></span>
+                    <span style="font-size: 0.9rem; font-weight: 700; color: #166534;" th:text="${complaint.rating + ' / 5 Stars'}">5/5 Stars</span>
+                </div>
+                <p style="font-size: 0.95rem; color: #14532d; font-style: italic;" th:text="${'“' + complaint.feedback + '”'}">Feedback text</p>
+            </div>
+
+            <form th:if="${complaint.rating == null}" th:action="@{/student/complaints/{id}/feedback(id=${complaint.id})}" th:object="${feedbackForm}" method="post">
+                <p style="font-size: 0.885rem; color: #166534; margin-bottom: 0.85rem;">Please rate the technician's repair speed and service quality:</p>
+                <div class="form-group" style="margin-bottom: 0.85rem;">
+                    <div style="display: flex; gap: 1.25rem; align-items: center;">
+                        <label th:each="r : ${#numbers.sequence(5, 1)}" style="cursor: pointer; display: flex; align-items: center; gap: 0.35rem; font-weight: 700; font-size: 0.95rem; color: #166534;">
+                            <input type="radio" th:field="*{rating}" th:value="${r}" required> <span th:text="${r} + ' ★'">5 ★</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" style="color: #166534;">Comments / Feedback:</label>
+                    <textarea th:field="*{feedback}" rows="2" class="form-control" placeholder="Share your feedback on the repair (optional)..."></textarea>
+                </div>
+                <button type="submit" class="btn-custom btn-success btn-sm">
+                    <i class="bi bi-check2-circle"></i> Submit Feedback
+                </button>
+            </form>
+        </div>
+
+        <!-- Reopen Section (When Resolved) -->
+        <div th:if="${complaint.status.name() == 'RESOLVED' or complaint.status.name() == 'REJECTED'}" style="border-top: 1px solid var(--border-color); padding-top: 1.25rem; margin-bottom: 2rem;">
+            <details>
+                <summary style="cursor: pointer; color: var(--danger); font-weight: 700; font-size: 0.9rem;">
+                    <i class="bi bi-arrow-counterclockwise"></i> Issue still recurring? Click here to request re-inspection
+                </summary>
+                <form th:action="@{/student/complaints/{id}/reopen(id=${complaint.id})}" method="post" style="margin-top: 1rem; background: var(--light-bg); padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                    <div class="form-group">
+                        <label class="form-label">Reason for Reopening *</label>
+                        <input type="text" name="reason" class="form-control" placeholder="Explain why the issue requires further inspection..." required>
+                    </div>
+                    <button type="submit" class="btn-custom btn-danger btn-sm">
+                        <i class="bi bi-arrow-clockwise"></i> Request Re-investigation
+                    </button>
+                </form>
+            </details>
+        </div>
+
+        <!-- Audit Timeline -->
+        <div>
+            <h4 style="font-size: 1rem; margin-bottom: 1rem;"><i class="bi bi-clock-history"></i> Resolution Journey & Logs</h4>
+            <div class="timeline">
+                <div th:each="log : ${complaint.logs}" class="timeline-item">
+                    <div class="timeline-point"></div>
+                    <div class="timeline-title" th:text="${log.action}">ACTION</div>
+                    <div class="timeline-time">
+                        <span th:text="${log.performedBy}">By Admin</span> &bull; 
+                        <span th:text="${#temporals.format(log.timestamp, 'dd MMM yyyy, hh:mm a')}">Time</span>
+                    </div>
+                    <div class="timeline-body" th:text="${log.remarks}">Remarks</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{common/fragments :: footer}"></div>
+</body>
+</html>

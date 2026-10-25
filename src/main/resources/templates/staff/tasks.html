@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/fragments :: head('Assigned Tasks - Staff')}"></head>
+<body>
+
+<div th:replace="~{common/fragments :: navbar}"></div>
+<div th:replace="~{common/fragments :: alerts}"></div>
+
+<div class="main-wrapper">
+    <div class="card-custom">
+        <div class="card-header-flex">
+            <div>
+                <h2>My Assigned Work Orders</h2>
+                <p style="color: var(--dark-muted); font-size: 0.875rem;">Manage, inspect, and update maintenance tickets assigned to you</p>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap;">
+            <a th:href="@{/staff/tasks}" 
+               th:class="${selectedStatus == 'ALL' ? 'btn-custom btn-primary btn-sm' : 'btn-custom btn-secondary btn-sm'}">All</a>
+            <a th:href="@{/staff/tasks(status='ASSIGNED')}" 
+               th:class="${selectedStatus == 'ASSIGNED' ? 'btn-custom btn-primary btn-sm' : 'btn-custom btn-secondary btn-sm'}">Assigned (New)</a>
+            <a th:href="@{/staff/tasks(status='IN_PROGRESS')}" 
+               th:class="${selectedStatus == 'IN_PROGRESS' ? 'btn-custom btn-primary btn-sm' : 'btn-custom btn-secondary btn-sm'}">In Progress</a>
+            <a th:href="@{/staff/tasks(status='RESOLVED')}" 
+               th:class="${selectedStatus == 'RESOLVED' ? 'btn-custom btn-primary btn-sm' : 'btn-custom btn-secondary btn-sm'}">Resolved</a>
+        </div>
+
+        <div th:if="${#lists.isEmpty(tasks)}" style="text-align: center; padding: 3rem; color: var(--dark-muted);">
+            <i class="bi bi-clipboard-check" style="font-size: 2.5rem;"></i>
+            <p style="margin-top: 0.5rem;">No tasks found for this status.</p>
+        </div>
+
+        <div class="table-responsive" th:if="${not #lists.isEmpty(tasks)}">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Ticket ID</th>
+                        <th>Hostel & Room</th>
+                        <th>Student & Phone</th>
+                        <th>Category & Title</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Assigned On</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="t : ${tasks}">
+                        <td><strong style="font-family: monospace;" th:text="${t.complaintNumber}">HCMS-101</strong></td>
+                        <td>
+                            <strong th:text="${t.hostelBlock}">Block A</strong>
+                            <div style="font-size: 0.8rem; color: var(--dark-muted);" th:text="${'Room ' + t.roomNumber}">Room 204</div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 600;" th:text="${t.student.fullName}">Rahul</div>
+                            <div style="font-size: 0.775rem; color: var(--dark-muted);"><i class="bi bi-telephone"></i> <span th:text="${t.student.phone}">+91 98765</span></div>
+                        </td>
+                        <td>
+                            <div style="font-size: 0.775rem; color: var(--dark-muted);" th:text="${t.category.displayName}">Electrical</div>
+                            <div style="font-weight: 500;" th:text="${t.title}">Fan issue</div>
+                        </td>
+                        <td><span th:class="'badge-priority ' + ${t.priority.badgeClass}" th:text="${t.priority.displayName}">HIGH</span></td>
+                        <td><span th:class="'badge-status ' + ${t.status.statusClass}" th:text="${t.status.displayName}">Assigned</span></td>
+                        <td th:text="${#temporals.format(t.createdAt, 'dd MMM yyyy')}">Date</td>
+                        <td>
+                            <a th:href="@{/staff/tasks/{id}(id=${t.id})}" class="btn-custom btn-primary btn-sm">
+                                <i class="bi bi-pencil-square"></i> Open & Update
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{common/fragments :: footer}"></div>
+</body>
+</html>

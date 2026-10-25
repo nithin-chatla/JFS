@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/fragments :: head('Work Order Details - Staff')}"></head>
+<body>
+
+<div th:replace="~{common/fragments :: navbar}"></div>
+<div th:replace="~{common/fragments :: alerts}"></div>
+
+<div class="main-wrapper" style="max-width: 950px;">
+    <div style="margin-bottom: 1rem;">
+        <a th:href="@{/staff/tasks}" class="btn-custom btn-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Back to Work Orders
+        </a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 2fr 1.2fr; gap: 1.5rem;">
+        <!-- Left: Work Order Information -->
+        <div>
+            <div class="card-custom" style="padding: 1.75rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--card-border); padding-bottom: 1rem; margin-bottom: 1.25rem;">
+                    <div>
+                        <span class="badge-status status-assigned" style="font-family: monospace; font-size: 0.85rem;" th:text="${task.complaintNumber}">HCMS-101</span>
+                        <h2 style="font-size: 1.35rem; margin-top: 0.35rem;" th:text="${task.title}">Fan issue</h2>
+                        <div style="font-size: 0.825rem; color: var(--dark-muted); margin-top: 0.25rem;">
+                            Category: <strong th:text="${task.category.displayName}">Electrical</strong> &bull; 
+                            Priority: <span th:class="'badge-priority ' + ${task.priority.badgeClass}" th:text="${task.priority.displayName}">HIGH</span>
+                        </div>
+                    </div>
+                    <span th:class="'badge-status ' + ${task.status.statusClass}" th:text="${task.status.displayName}">Assigned</span>
+                </div>
+
+                <!-- Location & Student Contact -->
+                <div style="background: #f8fafc; border: 1px solid var(--card-border); padding: 1.25rem; border-radius: var(--border-radius-sm); margin-bottom: 1.25rem;">
+                    <h4 style="font-size: 0.9rem; color: #1e293b; margin-bottom: 0.5rem;"><i class="bi bi-geo-alt-fill" style="color: var(--primary);"></i> Location & Resident Contact</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.9rem;">
+                        <div><strong>Hostel Block:</strong> <span th:text="${task.hostelBlock}">Block A</span></div>
+                        <div><strong>Room Number:</strong> <span th:text="${task.roomNumber}">204</span></div>
+                        <div><strong>Student:</strong> <span th:text="${task.student.fullName}">Rahul Verma</span></div>
+                        <div><strong>Phone:</strong> <a th:href="${'tel:' + task.student.phone}" th:text="${task.student.phone}" style="font-weight: 700;">+91 98765</a></div>
+                    </div>
+                </div>
+
+                <!-- Problem Description -->
+                <div style="margin-bottom: 1.25rem;">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: var(--dark-muted); text-transform: uppercase;">Student Issue Report</div>
+                    <div style="background: var(--light-bg); padding: 1rem; border-radius: var(--border-radius-sm); font-size: 0.925rem; color: #334155; margin-top: 0.35rem; line-height: 1.5;" th:text="${task.description}">
+                        Description
+                    </div>
+                </div>
+
+                <!-- Warden Remarks -->
+                <div th:if="${task.wardenRemarks != null}" style="background: #fffbeb; border: 1px solid #fef3c7; padding: 1rem; border-radius: var(--border-radius-sm); margin-bottom: 1.25rem;">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #92400e; text-transform: uppercase;"><i class="bi bi-info-circle"></i> Instructions from Warden</div>
+                    <p style="font-size: 0.875rem; color: #78350f; margin-top: 0.25rem;" th:text="${task.wardenRemarks}">Remarks</p>
+                </div>
+
+                <!-- Timeline -->
+                <div>
+                    <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem;"><i class="bi bi-clock-history"></i> Job Timeline</h4>
+                    <div class="timeline">
+                        <div th:each="log : ${task.logs}" class="timeline-item">
+                            <div class="timeline-point"></div>
+                            <div class="timeline-title" th:text="${log.action}">ACTION</div>
+                            <div class="timeline-time">
+                                <span th:text="${log.performedBy}">By</span> &bull; 
+                                <span th:text="${#temporals.format(log.timestamp, 'dd MMM yyyy, hh:mm a')}">Time</span>
+                            </div>
+                            <div class="timeline-body" th:text="${log.remarks}">Remarks</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Status Update Form -->
+        <div>
+            <div class="card-custom" style="padding: 1.5rem; position: sticky; top: 90px;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem;">
+                    <i class="bi bi-wrench"></i> Update Work Progress
+                </h3>
+
+                <form th:action="@{/staff/tasks/{id}/update(id=${task.id})}" method="post">
+                    <div class="form-group">
+                        <label class="form-label" for="status">Work Status *</label>
+                        <select id="status" name="status" class="form-control" required>
+                            <option th:each="st : ${staffStatuses}" 
+                                    th:value="${st}" 
+                                    th:text="${st.displayName}" 
+                                    th:selected="${task.status == st}">Status</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="staffRemarks">Technician Field Notes & Action Taken *</label>
+                        <textarea id="staffRemarks" name="staffRemarks" rows="4" class="form-control" placeholder="e.g. Visited room, replaced burned capacitor, verified fan working at full speed." required th:text="${task.staffRemarks}"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-custom btn-primary" style="width: 100%;">
+                        <i class="bi bi-check2-circle"></i> Save Work Order
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{common/fragments :: footer}"></div>
+</body>
+</html>

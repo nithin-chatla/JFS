@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{common/fragments :: head('My Profile')}"></head>
+<body>
+
+<div th:replace="~{common/fragments :: navbar}"></div>
+<div th:replace="~{common/fragments :: alerts}"></div>
+
+<div class="main-wrapper" style="max-width: 700px;">
+    <div class="card-custom" style="padding: 2.25rem;">
+        <div style="display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid var(--card-border); padding-bottom: 1.25rem; margin-bottom: 1.5rem;">
+            <div class="avatar-circle" style="width: 56px; height: 56px; font-size: 1.5rem;" th:text="${#strings.substring(student.fullName, 0, 1)}">R</div>
+            <div>
+                <h2 th:text="${student.fullName}">Rahul Verma</h2>
+                <p style="color: var(--dark-muted); font-size: 0.875rem;" th:text="${student.email}">student@hostel.edu</p>
+            </div>
+        </div>
+
+        <form th:action="@{/student/profile}" method="post">
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" name="fullName" th:value="${student.fullName}" class="form-control" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">College Email (Read Only)</label>
+                    <input type="text" th:value="${student.email}" class="form-control" disabled style="background: #f1f5f9;">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input type="text" name="phone" th:value="${student.phone}" class="form-control" required>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Hostel Block</label>
+                    <input type="text" name="hostelBlock" th:value="${student.hostelBlock}" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Room Number</label>
+                    <input type="text" name="roomNumber" th:value="${student.roomNumber}" class="form-control" required>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Bed / Unit No</label>
+                    <input type="text" name="bedNumber" th:value="${student.bedNumber}" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Department / Branch</label>
+                    <input type="text" name="department" th:value="${student.department}" class="form-control">
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn-custom btn-primary">
+                    <i class="bi bi-floppy"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div th:replace="~{common/fragments :: footer}"></div>
+</body>
+</html>
